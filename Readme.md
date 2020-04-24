@@ -29,7 +29,7 @@ node index.js
 
 I just whipped this up pretty quickly so there may be bugs.  Please let me know (by the way, I this does not work with node 7 on windows as of right now)
 
-Additional prerequisite:(my experience)
+## Additional prerequisite:(my experience)
 
 need to run this under administrator mode power shell window:
 npm install --global --production windows-build-tools
