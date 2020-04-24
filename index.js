@@ -1,5 +1,6 @@
-//Edit this url to point to your mongo db!
-var mongoUrl = 'mongodb://localhost:27017/test';
+//Edit this url and db name to point to your mongo db!
+var mongoUrl = 'mongodb://localhost:27017/';
+var db = 'testdb';
 
 
 
@@ -13,21 +14,26 @@ async(function () {
         console.log("using connection URL: " + mongoUrl);
         console.log("If this is wrong, change it in index.js.  If your not seeing anything probaly need to change it")
         var dbCon = await(MongoClient.connect(mongoUrl));
-        process.on('SIGINT', function () { //Should I do this ?
+        process.on('SIGINT', function () { 
             dbCon.close();
             console.log('Closed Database Connection');
             process.exit();
         })
-        var Profile = dbCon.collection('system.profile');
+        var Profile = dbCon.db(db).collection('system.profile');
         var items;
         var lastTime = new Date();
-        while (true) {
-            items = await(Profile.find({ ts: { $gte: lastTime }, junkField: { $ne: "SDLKJFJ" } }).toArray());
+        while (true) { 
+            items = await(Profile.find({ ts: { $gte: lastTime }, junkField: { $ne: "SDLKJFJ" } }).toArray());  // this query itself with junkField
             lastTime = new Date();
             items.forEach((item) => {
-                if (item.query && !item.query.junkField && item.ns != "meteor.cronHistory")
-                    console.log(item.ns + "::\n" + "" + item.op + " ", JSON.stringify(item.query, null, "  ") + "\n");
-            });
+ 		      // console.log(JSON.stringify(item, null, "  "));  // for debug
+                if (item.query && item.query.filter && !item.query.filter.junkField || 
+					item.command && item.command.aggregate ||
+					item.command && item.command.filter && !item.command.filter.junkField
+				) { 	//support query and aggregate command 
+						console.log("collection:" + item.ns + "\nop:" + item.op + "\ncontent: ", item.query ? JSON.stringify(item.query, null, "  ") : JSON.stringify(item.command, null, "  ") + "\n");
+				  }
+			});
             await(pause());
         }
     } catch (e) {
