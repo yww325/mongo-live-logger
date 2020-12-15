@@ -27,9 +27,8 @@ async(function () {
             lastTime = new Date();
             items.forEach((item) => {
  		      // console.log(JSON.stringify(item, null, "  "));  // for debug
-                if (item.query && item.query.filter && !item.query.filter.junkField || 
-					item.command && item.command.aggregate ||
-					item.command && item.command.filter && !item.command.filter.junkField
+                if (item.query && item.query.filter && !item.query.filter.junkField ||  
+					item.command && (!item.command.filter || (item.command.filter && !item.command.filter.junkField))
 				) { 	//support query and aggregate command 
 						console.log("collection:" + item.ns + "\nop:" + item.op + "\ncontent: ", item.query ? JSON.stringify(item.query, null, "  ") : JSON.stringify(item.command, null, "  ") + "\n");
 				  }
